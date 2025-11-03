@@ -1,0 +1,18 @@
+# Minimal deps for API (no geopandas/fiona - ingestion disabled)
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+sqlalchemy==2.0.25
+geoalchemy2==0.14.3
+alembic==1.13.1
+psycopg2-binary==2.9.9
+pydantic==2.6.1
+pydantic-settings==2.1.0
+python-jose[cryptography]==3.3.0
+bcrypt==4.0.1
+passlib[bcrypt]==1.7.4
+celery[redis]==5.3.6
+numpy<2
+shapely==2.0.2
+python-multipart==0.0.9
+structlog==24.1.0
+httpx==0.26.0
