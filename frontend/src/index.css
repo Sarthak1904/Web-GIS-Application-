@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-200 antialiased;
+  }
+}
+
+/* Leaflet overrides for dark theme */
+.leaflet-container {
+  font-family: inherit;
+  background: #0f172a !important;
+}
