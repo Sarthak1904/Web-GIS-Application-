@@ -1,0 +1,131 @@
+# Enterprise Geospatial Intelligence Platform — Docker Compose
+# Production-grade multi-service orchestration
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: geospatial-postgres
+    environment:
+      POSTGRES_USER: geospatial
+      POSTGRES_PASSWORD: geospatial
+      POSTGRES_DB: geospatial_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_postgis.sql:/docker-entrypoint-initdb.d/01_init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geospatial -d geospatial_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: geospatial-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  geoserver:
+    image: kartoza/geoserver:2.25.2
+    container_name: geospatial-geoserver
+    environment:
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: geoserver
+      GEOSERVER_ADMIN_MAIL: admin@example.com
+      GEOWEBCACHE_CACHE_DIR: /opt/geoserver/data_dir/gwc
+    volumes:
+      - geoserver_data:/opt/geoserver/data_dir
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/geoserver/web/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geospatial-backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://geospatial:geospatial@postgres:5432/geospatial_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      GEOSERVER_URL: http://geoserver:8080/geoserver
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geospatial-celery-worker
+    environment:
+      DATABASE_URL: postgresql+psycopg2://geospatial:geospatial@postgres:5432/geospatial_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=4
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geospatial-celery-beat
+    environment:
+      DATABASE_URL: postgresql+psycopg2://geospatial:geospatial@postgres:5432/geospatial_db
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+    depends_on:
+      celery_worker:
+        condition: service_started
+    restart: unless-stopped
+    command: celery -A app.worker.celery_app beat --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:
+  geoserver_data:

@@ -1,0 +1,15 @@
+# Docker Compose override for local development
+# Copy to docker-compose.override.yml and customize
+#
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+services:
+  backend:
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery_worker:
+    volumes:
+      - .:/app
+    command: celery -A app.worker.celery_app worker --loglevel=debug --concurrency=2

@@ -1,0 +1,70 @@
+# Minimal compose for quick local demo (no GeoServer)
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: geospatial-postgres
+    environment:
+      POSTGRES_USER: geospatial
+      POSTGRES_PASSWORD: geospatial
+      POSTGRES_DB: geospatial_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_postgis.sql:/docker-entrypoint-initdb.d/01_init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geospatial -d geospatial_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: geospatial-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.quick
+    container_name: geospatial-backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://geospatial:geospatial@postgres:5432/geospatial_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: dev-secret-key
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.quick
+    container_name: geospatial-celery-worker
+    environment:
+      DATABASE_URL: postgresql+psycopg2://geospatial:geospatial@postgres:5432/geospatial_db
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: dev-secret-key
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - backend
+      - postgres
+      - redis
+    command: celery -A app.worker.celery_app worker --loglevel=info --concurrency=2
+
+volumes:
+  postgres_data:
