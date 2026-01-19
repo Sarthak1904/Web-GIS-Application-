@@ -2,6 +2,8 @@
 
 > Production-grade geospatial data infrastructure for government agencies, utilities, and emergency management. Built entirely with free and open-source technologies.
 
+**[Watch the demo](https://drive.google.com/file/d/13dgxdUMD-XLlYTbRmBhmCja0ER_afbHl/view?usp=drive_link)** — See the platform in action with shapefile upload, spatial queries, and map visualization.
+
 ---
 
 ## Overview
