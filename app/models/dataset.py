@@ -2,16 +2,11 @@
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Enum, Index
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum, Index
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-
-if TYPE_CHECKING:
-    from app.models.feature import Feature
-    from app.models.user import User
 
 
 class DatasetLifecycleStatus(str, enum.Enum):

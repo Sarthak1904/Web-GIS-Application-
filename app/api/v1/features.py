@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from geoalchemy2.functions import ST_Intersects, ST_DWithin, ST_MakeEnvelope, ST_GeomFromText
+from geoalchemy2.functions import ST_Intersects, ST_DWithin
 from geoalchemy2 import WKTElement
 
 from app.core.database import get_db
@@ -13,7 +13,6 @@ from app.models.feature import Feature
 from app.models.dataset import DatasetVersion, DatasetLifecycleStatus
 from app.api.deps import get_current_user_optional
 from app.models.user import User
-from app.schemas.feature import FeatureResponse, FeatureCollectionResponse
 
 router = APIRouter(prefix="/features", tags=["features"])
 

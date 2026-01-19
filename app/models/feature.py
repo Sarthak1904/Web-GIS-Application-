@@ -1,16 +1,12 @@
 """Spatial feature model with geometry storage."""
 
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Index
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-
-if TYPE_CHECKING:
-    from app.models.dataset import DatasetVersion
 
 
 class Feature(Base):

@@ -2,15 +2,10 @@
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum, Index
-from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-
-if TYPE_CHECKING:
-    from app.models.user import User
 
 
 class ProcessingJobStatus(str, enum.Enum):

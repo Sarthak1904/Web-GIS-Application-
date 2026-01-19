@@ -1,12 +1,12 @@
 """FastAPI dependencies for database, auth, and RBAC."""
 
-from typing import Annotated, Generator, Optional
+from typing import Annotated, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db, SessionLocal
+from app.core.database import get_db
 from app.core.security import decode_token
 from app.models.user import User, Role
 

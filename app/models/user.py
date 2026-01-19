@@ -2,15 +2,11 @@
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Table
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
-
-if TYPE_CHECKING:
-    from app.models.dataset import Dataset
 
 
 class RoleEnum(str, enum.Enum):

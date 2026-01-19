@@ -5,7 +5,6 @@ import os
 from datetime import datetime
 from typing import Optional
 
-from celery import shared_task
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
@@ -13,8 +12,6 @@ from config import get_settings
 from app.worker.celery_app import celery_app
 from app.models.processing import ProcessingJob, ProcessingJobStatus
 from app.models.dataset import DatasetVersion, DatasetLifecycleStatus
-from app.models.feature import Feature
-from app.core.database import Base
 
 settings = get_settings()
 engine = create_engine(settings.database_url)
@@ -177,9 +174,6 @@ def run_buffer_task(
         job.status = ProcessingJobStatus.RUNNING
         job.started_at = datetime.utcnow()
         db.commit()
-
-        # Approximate degrees from meters (at equator)
-        dist_deg = distance_meters / 111320.0
 
         if feature_ids:
             result = db.execute(

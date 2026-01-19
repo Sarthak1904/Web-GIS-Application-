@@ -10,7 +10,6 @@ from pydantic import BaseModel
 from app.core.database import get_db
 from app.core.security import (
     verify_password,
-    get_password_hash,
     create_access_token,
     create_refresh_token,
     decode_token,

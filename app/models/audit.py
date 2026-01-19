@@ -4,7 +4,6 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum, Index
-from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 

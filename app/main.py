@@ -7,8 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from app.api.v1 import auth, datasets, features, process, upload, admin
-from app.core.database import engine, Base
-from app.models import User, Role, Dataset, DatasetVersion, Feature, ProcessingJob, AuditLog
 
 settings = get_settings()
 

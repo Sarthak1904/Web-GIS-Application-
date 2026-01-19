@@ -2,14 +2,14 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.dataset import Dataset, DatasetVersion, DatasetLifecycleStatus
 from app.models.processing import ProcessingJob, ProcessingJobType, ProcessingJobStatus
 from app.models.user import User
-from app.api.deps import get_current_user, require_role
+from app.api.deps import require_role
 from app.services.audit import audit_service
 from app.worker.tasks import ingest_shapefile_task
 from config import get_settings
